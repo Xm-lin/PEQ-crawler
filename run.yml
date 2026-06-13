@@ -1,0 +1,14 @@
+    steps:
+    - name: 檢查程式碼
+      uses: actions/checkout@v4
+
+    - name: 設定 Python 環境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 👇 這裡是要修改的 RUN 指令區塊
+    - name: 建立資料夾並執行 Python 檔案
+      run: |
+        mkdir -p crawler
+        python UI.py
