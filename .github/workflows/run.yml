@@ -17,4 +17,4 @@ jobs:
     - name: 建立資料夾並執行
       run: |
         mkdir -p crawler
-        python main.py
+        python UI.py
