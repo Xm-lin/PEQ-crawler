@@ -17,4 +17,6 @@ jobs:
     - name: 建立資料夾並執行
       run: |
         mkdir -p crawler
-        python UI.py
+        python -m pip install --upgrade pip
+        pip install beautifulsoup4      # 👈 新增這一行：自動安裝爬蟲套件！
+        python UI.py                    # ⚠️ 看到錯誤訊息，您的啟動檔名稱似乎是 UI.py 喔！
