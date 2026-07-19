@@ -83,9 +83,7 @@ class LoadingWindow:
             # 1. 載入年份列表中....
             # ---------------------------------------------
             self.update_status("載入年份列表中....")
-            self.root.after(500)  # 微調延遲，讓使用者看得到字眼切換
-
-            # 實際呼叫你的爬蟲功能取得年份
+            self.root.after(1000) 
             self.years = MYcrawler.get_years()
 
             if self.is_cancelled:
@@ -95,7 +93,7 @@ class LoadingWindow:
             # 2. 載入成功
             # ---------------------------------------------
             self.update_status("載入成功！")
-            self.root.after(1000)  # 讓「載入成功」在畫面上停個 1 秒鐘
+            self.root.after(1000)  
 
             if self.is_cancelled:
                 return
@@ -104,7 +102,7 @@ class LoadingWindow:
             # 3. 正在開啟 crawler...
             # ---------------------------------------------
             self.update_status("正在開啟 crawler...")
-            self.root.after(1000)  # 停頓一下，隨後進入主程式
+            self.root.after(1000) 
 
             if self.is_cancelled:
                 return
