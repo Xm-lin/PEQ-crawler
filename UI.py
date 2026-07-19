@@ -4,7 +4,7 @@ from tkinter import messagebox
 import threading
 import MYcrawler 
 import webbrowser
-import tkmacosx,os
+import tkmacosx,os,sys
 #色彩定義 
 COLOR_BG = "#F8F9FA"         
 COLOR_TEXT = "#495057"       
@@ -12,10 +12,110 @@ COLOR_BTN = "#1D3557"
 COLOR_BTN_TXT = "#FFFFFF"   
 COLOR_LINK = "#457B9D"       
 COLOR_LINK_HOVER = "#128D2D"
-os.system("pip install requests beautifulsoup4 playwright tkmacosx")
+os.system("pip install requests beautifulsoup4 playwright tkmacosx ")
 
 datas = []
+class LoadingWindow:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("系統初始化")
 
+        # 1. 定義你想要的視窗寬度與高度
+        window_width = 300
+        window_height = 150
+
+        # 2. 取得使用者螢幕的解析度（寬與高）
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        # 3. 計算讓視窗置中的左上角 (x, y) 座標
+        center_x = int((screen_width - window_width) / 2)
+        center_y = int((screen_height - window_height) / 2)
+
+        # 4. 設定視窗大小與置中位置，格式為: 寬x高+X座標+Y座標
+        self.root.geometry(
+            f"{window_width}x{window_height}+{center_x}+{center_y}"
+        )
+
+        # 固定視窗大小，禁止使用者縮放
+        self.root.resizable(False, False)
+
+        # 攔截關閉按鈕
+        self.root.protocol("WM_DELETE_WINDOW", self.on_cancel)
+
+        # 狀態文字標籤
+        self.label = tk.Label(
+            self.root, text="準備中...", font=("Arial", 12), pady=20
+        )
+        self.label.pack()
+
+        # 取消按鈕
+        self.cancel_btn = tk.Button(
+            self.root, text="Cancel", command=self.on_cancel, width=10
+        )
+        self.cancel_btn.pack(pady=10)
+
+        self.years = None
+        self.is_cancelled = False
+
+        # 視窗載入完成後，立刻依序執行
+        self.root.after(100, self.run_steps)
+
+    def on_cancel(self):
+        """按下 Cancel 時跳出確認畫面"""
+        # showwarning 或 askokcancel 都可以，這裡用 askokcancel 最符合「是否離開 + 確認按鈕」
+        confirm = messagebox.askokcancel("提示", "是否離開？")
+        if confirm:
+            self.is_cancelled = True
+            self.root.destroy()
+            sys.exit()  # 完全結束整個 Python 程式
+
+    def update_status(self, text):
+        """更新文字並強制刷新畫面，避免視窗凍結"""
+        if self.is_cancelled:
+            return
+        self.label.config(text=text)
+        self.root.update()
+
+    def run_steps(self):
+        try:
+            # ---------------------------------------------
+            # 1. 載入年份列表中....
+            # ---------------------------------------------
+            self.update_status("載入年份列表中....")
+            self.root.after(500)  # 微調延遲，讓使用者看得到字眼切換
+
+            # 實際呼叫你的爬蟲功能取得年份
+            self.years = MYcrawler.get_years()
+
+            if self.is_cancelled:
+                return
+
+            # ---------------------------------------------
+            # 2. 載入成功
+            # ---------------------------------------------
+            self.update_status("載入成功！")
+            self.root.after(1000)  # 讓「載入成功」在畫面上停個 1 秒鐘
+
+            if self.is_cancelled:
+                return
+
+            # ---------------------------------------------
+            # 3. 正在開啟 crawler...
+            # ---------------------------------------------
+            self.update_status("正在開啟 crawler...")
+            self.root.after(1000)  # 停頓一下，隨後進入主程式
+
+            if self.is_cancelled:
+                return
+
+            # 關閉讀取視窗
+            self.root.destroy()
+
+        except Exception as e:
+            messagebox.showerror("錯誤", f"初始化失敗:\n{e}")
+            self.root.destroy()
+            sys.exit()
 
 def update_ui(screen, subject, year):
     global datas
@@ -190,10 +290,10 @@ def main(years):
     screen.mainloop()
 
 if __name__ == "__main__":
-    print("正在取得年份列表，請稍候...")
-    try:
-        years = MYcrawler.get_years()
-        print("載入成功")
-        main(years)
-    except Exception as e:
-        print(f"初始化失敗，無法取得年份: {e}")
+    # 啟動進度視窗
+    loading = LoadingWindow()
+    loading.root.mainloop()
+
+    # 當讀取視窗順利結束後，把取得的年份傳入你的主程式
+    if loading.years is not None:
+        main(loading.years)
