@@ -110,7 +110,11 @@ def download_pdf(url, filename):
     global save_dir
     with open("data.json","r",encoding="utf-8") as f:
         data = json.load(f)
-        save_dir = data["save_dir"]
+        try:
+            save_dir = data["save_dir"]
+        except: 
+            choose_path()
+            
     try:
         if save_dir =="":
             save_dir = "歷屆試題"
@@ -147,10 +151,10 @@ def download_pdf(url, filename):
 
 def choose_path():
     global save_dir
-    with open("crawler/data.json","r",encoding="utf-8") as f:
+    with open("data.json","r",encoding="utf-8") as f:
         data = json.load(f)
     save_dir = filedialog.askdirectory()
     data["save_dir"] = save_dir
-    with open("crawler/data.json","w",encoding="utf-8") as f:
+    with open("data.json","w",encoding="utf-8") as f:
         json.dump(data,f,ensure_ascii=False,indent=4)
 
