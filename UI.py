@@ -31,23 +31,11 @@ class App(ctk.CTk):
     center_y = int((screen_height - window_height) / 2)
     self.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
-    # 建立頂端選單
-    self.setup_menu()
-
     # 顯示載入畫面
     self.show_loading_frame()
 
     # 非同步在背景載入年份
     self.after(100, self.async_load_years)
-
-  def setup_menu(self):
-    menu = tk.Menu(self)
-    setting_menu = tk.Menu(menu, tearoff=False)
-    setting_menu.add_command(
-        label="修改檔案儲存路徑", command=MYcrawler.choose_path
-    )
-    menu.add_cascade(label="設定", menu=setting_menu)
-    self.configure(menu=menu)
 
   def show_loading_frame(self):
     """顯示初始化載入畫面"""
@@ -65,7 +53,6 @@ class App(ctk.CTk):
     def task():
       try:
         years = MYcrawler.get_years()
-        # 切回主執行緒更新 UI
         self.after(0, lambda: self.show_main_frame(years))
       except Exception as e:
         self.after(
@@ -83,9 +70,28 @@ class App(ctk.CTk):
     """移除載入畫面，建立主功能介面"""
     self.loading_frame.destroy()
 
+    # 頂端功能列（移至左側）
+    top_bar = ctk.CTkFrame(self, fg_color="transparent")
+    top_bar.pack(fill="x", padx=15, pady=(10, 0))
+
+    # 改用更直覺的設定按鈕（靠左對齊），點擊直接修改路徑
+    # 這樣就不會有 CTkOptionMenu 預設把標題當選項的怪異感
+    self.setting_btn = ctk.CTkButton(
+        top_bar,
+        text="⚙️ 修改儲存路徑",
+        command=MYcrawler.choose_path,
+        width=130,
+        height=28,
+        font=ctk.CTkFont(size=11),
+        fg_color=("gray70", "gray30"),  # 自動適應深淺色
+        text_color=("black", "white"),
+        hover_color=("gray60", "gray40"),
+    )
+    self.setting_btn.pack(side="left")
+
     # 項目選擇區塊
     select = ctk.CTkFrame(self)
-    select.pack(fill="x", padx=15, pady=15)
+    select.pack(fill="x", padx=15, pady=10)
 
     sub_lab = ctk.CTkLabel(
         select, text="選擇科目:", font=ctk.CTkFont(size=12, weight="bold")
